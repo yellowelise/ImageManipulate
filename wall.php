@@ -1,6 +1,6 @@
 <?php
 ini_set('memory_limit', '32048M');
-include("im.class.php");
+include("class/im.class.php");
 
 
 /* default value */
