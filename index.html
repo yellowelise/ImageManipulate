@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+	<title>ImageManipulate class</title>
+	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+	<meta name="author" content="Andrea Battellocchi" />
+</head>
+<style>
+h1 {text-align:center;}
+h2 {text-align:center;}
+h3 {text-align:center;}
+p {text-align:center;}
+
+img.center {
+    display: block;
+    margin: 0 auto;
+}
+</style>
+
+<body>
+	
+<a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
+<h1>ImageManipulate Class description</h1>
+<h2>Click to image for reload</h2>
+<p>ImageManipulate is a PHP class to manipulate images</p>	
+
+<h2>wall examples</h2>
+<h3>Example 1: all random values (800X600)</h3>
+<p>Create wall with random file from media dir</p>
+<img class="center" src="wall.php?w=800&h=600" id="ex1" onclick=reload(this) style="cursor:pointer">
+
+<h3>Example 2: fixed size one row (800X100)</h3>
+<p>Create stripe with random file from media dir</p>
+<p>"r" is number of Rows</p>
+<p>"c" is number of Columns - "c" is ignored if use rows</p>
+<img class="center" src="wall.php?w=800&h=100&r=1&c=0" id="ex2" onclick=reload(this) style="cursor:pointer">
+
+<h3>Example 3: fixed size one Column (800X100)</h3>
+<p>Create vertical stripe with random file from media dir</p>
+<p>"r" is number of Rows</p>
+<p>"c" is number of Columns - "c" is ignored if use rows</p>
+<img class="center" src="wall.php?w=100&h=800&r=0&c=1" id="ex3" onclick=reload(this) style="cursor:pointer">
+<hr />
+
+
+
+<h2>Asciize examples</h2>
+<p>Create Ascii image with random file from media dir</p>
+<h3>Example 1: without crop</h3>
+<img class="center" src="asciize.php?w=800&h=600&c=0" id="ex4" onclick=reload(this) style="cursor:pointer">
+<h3>Example 2: with crop</h3>
+<img class="center" src="asciize.php?w=800&h=600&c=1" id="ex5" onclick=reload(this) style="cursor:pointer">
+<hr />
+
+
+	
+<h2>Mantain aspect ratio with max size examples</h2>
+<p>Create resized image mantaining aspect ratio of image with random file from media dir</p>
+<img class="center" src="resize_size.php?w=800&h=600&c=0" id="ex6" onclick=reload(this) style="cursor:pointer">
+<hr />
+
+
+<h2>Crop to fit explicit width and height examples</h2>
+<p>Create resized and cropped image to fit explicit Width and height of image with random file from media dir</p>
+<img class="center" src="resize_size.php?w=800&h=600&c=1" id="ex7" onclick=reload(this) style="cursor:pointer">
+
+
+<h2>Filter examples</h2>
+
+			<p>IMG_FILTER_NEGATE: Reverses all colors of the image.</p>
+<img class="center" src="filter.php?w=400&h=300&c=1&i=0" id="ex8" onclick=reload(this) style="cursor:pointer">
+			<p>IMG_FILTER_GRAYSCALE: Converts the image into grayscale.</p>
+<img class="center" src="filter.php?w=400&h=300&c=1&i=1" id="ex9" onclick=reload(this) style="cursor:pointer">
+			<p>IMG_FILTER_BRIGHTNESS: Changes the brightness of the image. Use arg1 to set the level of brightness. The range for the brightness is -255 to 255.</p>
+<img class="center" src="filter.php?w=400&h=300&c=1&i=2" id="ex10" onclick=reload(this) style="cursor:pointer">
+			<p>IMG_FILTER_CONTRAST: Changes the contrast of the image. Use arg1 to set the level of contrast.</p>
+<img class="center" src="filter.php?w=400&h=300&c=1&i=3" id="ex11" onclick=reload(this) style="cursor:pointer">
+			<p>IMG_FILTER_COLORIZE: Like <p>IMG_FILTER_GRAYSCALE, except you can specify the color. Use arg1, arg2 and arg3 in the form of red, green, blue and arg4 for the alpha channel. The range for each color is 0 to 255.</p>
+<img class="center" src="filter.php?w=400&h=300&c=1&i=4" id="ex12" onclick=reload(this) style="cursor:pointer">
+			<p>IMG_FILTER_EDGEDETECT: Uses edge detection to highlight the edges in the image.</p>
+<img class="center" src="filter.php?w=400&h=300&c=1&i=5" id="ex13" onclick=reload(this) style="cursor:pointer">
+			<p>IMG_FILTER_EMBOSS: Embosses the image.</p>
+<img class="center" src="filter.php?w=400&h=300&c=1&i=6" id="ex14" onclick=reload(this) style="cursor:pointer">
+			<p>IMG_FILTER_GAUSSIAN_BLUR: Blurs the image using the Gaussian method.</p>
+<img class="center" src="filter.php?w=400&h=300&c=1&i=7" id="ex15" onclick=reload(this) style="cursor:pointer">
+			<p>IMG_FILTER_SELECTIVE_BLUR: Blurs the image.</p>
+<img class="center" src="filter.php?w=400&h=300&c=1&i=8" id="ex16" onclick=reload(this) style="cursor:pointer">
+			<p>IMG_FILTER_MEAN_REMOVAL: Uses mean removal to achieve a "sketchy" effect.</p>
+<img class="center" src="filter.php?w=400&h=300&c=1&i=9" id="ex17" onclick=reload(this) style="cursor:pointer">
+			<p>IMG_FILTER_SMOOTH: Makes the image smoother. Use arg1 to set the level of smoothness.</p>
+<img class="center" src="filter.php?w=400&h=300&c=1&i=10" id="ex18" onclick=reload(this) style="cursor:pointer">
+			<p>IMG_FILTER_PIXELATE: Applies pixelation effect to the image, use arg1 to set the block size and arg2 to set the pixelation effect mode.</p>
+<img class="center" src="filter.php?w=400&h=300&c=1&i=11&arg1=10" id="ex19" onclick=reload(this) style="cursor:pointer">
+
+
+
+</body>
+
+</html>
+<script>
+ function reload(obj)
+ {
+	 document.getElementById(obj.id).src = obj.src + "&rnd" +Math.random(5);
+//	 console.log(	 document.getElementById("ex3").src);
+ }
+</script>
