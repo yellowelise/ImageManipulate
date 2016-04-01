@@ -1,13 +1,13 @@
 # ImageManipulate
-ImageManipulate is a PHP class to manipulate images
-this class can
-Create wall with random file from media dir
-Create horizontal stripe with random file from media dir
-Create vertical stripe with random file from media dir
-Create Ascii image with random file from media dir
-Create resized image mantaining aspect ratio of image with random file from media dir
-Crop to fit explicit width and height examples
-Apply filter to image like:
+ImageManipulate is a PHP class to manipulate images<br />
+this class can<br />
+Create wall with random file from media dir<br />
+Create horizontal stripe with random file from media dir<br />
+Create vertical stripe with random file from media dir<br />
+Create Ascii image with random file from media dir<br />
+Create resized image mantaining aspect ratio of image with random file from media dir<br />
+Crop to fit explicit width and height examples<br />
+Apply filter to image like:<br />
 			<p>IMG_FILTER_NEGATE: Reverses all colors of the image.</p>
 			<p>IMG_FILTER_GRAYSCALE: Converts the image into grayscale.</p>
 			<p>IMG_FILTER_BRIGHTNESS: Changes the brightness of the image. Use arg1 to set the level of brightness. The range for the brightness is -255 to 255.</p>
