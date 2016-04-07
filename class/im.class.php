@@ -122,8 +122,29 @@ class ImageManipulate
         }
         
     }
+
+	public function grab_screen($new_w=800,$new_h=600,$c=0,$s=0)
+	{
+		$this->img = imagegrabscreen();
+		
+		$this->filename = "desktop_" . date("Y_m_d") . ".png";
+        $this->w        = $new_w;
+        $this->h        = $new_h;
+        $this->c        = $c;
+        $this->s        = $s;
+//        $this->cachedfile = $this->CachePath . "grab_" . sha1($this->filename).".png";
+		if ($c==1)
+		 $this->img = $this->redim_whc($this->img,$this->w,$this->h);	
+		else
+		 $this->img = $this->redim_wh($this->img,$this->w,$this->h);	
+		
+		
+//		imagepng($this->img,$this->cachedfile);
+		imagepng($this->img);
+
+	}
     
-    public function asciize($filename = '', $chars = 'ewk34543Â§GÂ§$Â§$Tg34g4g', $shrpns = 1, $size = 4, $weight = 2, $output = 1, $w = 800, $h = 600, $c = 0)
+    public function asciize($filename = '', $chars = 'Battello', $shrpns = 1, $size = 4, $weight = 2, $output = 1, $w = 800, $h = 600, $c = 0)
     {
         
         if ($filename == '')
@@ -283,10 +304,11 @@ class ImageManipulate
             mkdir($this->CachePath);
         $this->redim_whc($this->img, $w, $h, $c, $s);
         $this->filter($filtertype, $arg1, $arg2, $arg3, $arg4);
-        $this->cachedfile = $this->CachePath . "filtered_" . $filtertype . "_s" . $this->s . "px_c" . $this->c . "_" . $this->w . "x" . $this->h . "px_" . sha1($filename) . "." . $ext;
+        $this->cachedfile = $this->CachePath . "filtered_" . $filtertype . "_s" . $this->s . "px_c" . $this->c . "_" . $this->w . "x" . $this->h . "px_" . sha1($filename.$arg1."-".$arg2."-".$arg3."-".$arg4) . "." . $ext;
         $this->create_cached($this->img);
         //return ($cachedfile);
     }
+    
     
     public function append($fn1, $fn2, $w, $h, $output = 1, $direction = 0)
     {
@@ -308,6 +330,7 @@ class ImageManipulate
     private function abs_2_rel($file)
     {
         $res = str_replace($this->FilePath, "", $file);
+        $res = str_replace(DIRECTORY_SEPARATOR, "/", $res);
         return $res;
     }
     
@@ -326,7 +349,7 @@ class ImageManipulate
         $this->cachedfile = $this->CachePath . "wall_" . $w . "x" . $h . "_" . $c . "x" . $r . "_" . sha1($this->filename) . "." . $ext;
         
         if ($output == 0)
-            echo abs_2_rel($this->cachedfile);
+            echo $this->abs_2_rel($this->cachedfile);
         // print_r($fna);
         $this->create_cached_append_array($this->filename, $this->cachedfile, $fna, $w, $h, $c, $r, $output);
         //return ($cachedfile);
@@ -428,7 +451,7 @@ class ImageManipulate
             }
             
         }
-        
+         $this->img = $imc;
         // wm($cachedfile);
         @imagedestroy($imc);
         @imagedestroy($im);
@@ -499,7 +522,7 @@ class ImageManipulate
             }
             
         }
-        
+         $this->img = $imc;
         // wm($cachedfile);
         @imagedestroy($imc);
         @imagedestroy($im);
