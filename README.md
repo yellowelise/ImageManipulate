@@ -20,4 +20,5 @@ Apply filter to image like:<br />
 <p>IMG_FILTER_SMOOTH: Makes the image smoother. Use arg1 to set the level of smoothness.</p>
 <p>IMG_FILTER_PIXELATE: Applies pixelation effect to the image, use arg1 to set the block size and arg2 to set the pixelation effect mode.</p>
 
-
+[link]
+http://tech-futilities.com
