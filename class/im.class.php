@@ -1,14 +1,15 @@
 <?php
-ini_set('display_errors', 'On');
-ini_set('display_startup_errors', 'On');
-error_reporting(1);
 /*
- * Version 28.07.16
+ * Version 22.11.16
  */
+
+/*ini_set('display_errors', 'On');
+ini_set('display_startup_errors', 'On');
+error_reporting(1);
 ini_set('display_errors', 'On');
 ini_set('display_startup_errors', 'On');
 error_reporting(1);
-
+*/
 
 
 class ImageManipulate
@@ -39,14 +40,9 @@ class ImageManipulate
     
    
     
+   
+    
     private function orient_image($file_path)
-    {
-		
-    }
-    
-
-    
-    private function ok_orient_image($file_path)
     {
         
         if (!function_exists('exif_read_data')) {
