@@ -1,21 +1,35 @@
 <?php
+ini_set('display_errors', 'On');
+ini_set('display_startup_errors', 'On');
+error_reporting(1);
+/*
+ * Version 28.07.16
+ */
+ini_set('display_errors', 'On');
+ini_set('display_startup_errors', 'On');
+error_reporting(1);
+
+
+
 class ImageManipulate
 {
     // proprietà 
     public $CachePath = '';
+    public $FilePath = '';
     private $w;
     private $h;
     private $c;
     private $s;
     private $img;
     public $filename;
-    public $cachedfile;
+    public $cachedfile='';
     public $output;
+    public $ImageInfo;
     // metodi
     public function __construct($filename = '', $w = 300, $h = 300, $c = 1, $s = 0, $output = 1)
     {
         //inizializzazione della proprietÃ  $name    
-        $this->filename = $filename;
+        $this->filename = $this->FilePath . $filename;
         $this->w        = $w;
         $this->h        = $h;
         $this->c        = $c;
@@ -23,7 +37,16 @@ class ImageManipulate
         $this->output   = $output;
     }
     
+   
+    
     private function orient_image($file_path)
+    {
+		
+    }
+    
+
+    
+    private function ok_orient_image($file_path)
     {
         
         if (!function_exists('exif_read_data')) {
@@ -66,6 +89,7 @@ class ImageManipulate
         return $success;
     }
     
+
     private function filter($filtertype, $arg1, $arg2, $arg3, $arg4)
     {
         /*
@@ -143,7 +167,85 @@ class ImageManipulate
 		imagepng($this->img);
 
 	}
-    
+    public function resize_image_info($filename='', $w = 300, $h = 300, $c = 1, $s = 0)
+    {
+		
+		
+		
+		if ($filename == '')
+            $filename = $this->filename;
+        
+        $ext = substr(strrchr($filename, '.'), 1);
+        $this->cachedfile = $this->CachePath . "s" . $s . "px_c" . $c . "_" . $w . "x" . $h . "px_" . sha1($filename) . "." . $ext;
+			 
+		$filename = str_replace("/",DIRECTORY_SEPARATOR,$this->filename);
+		$json["debug"]["filename"] = $filename;
+		$json["debug"]["cachedfile"] = $this->cachedfile;
+
+        if (file_exists($this->cachedfile)) 
+			{
+			$json["debug"][] = "Esiste: ". $this->cachedfile;
+
+            if (strtolower($ext) == 'gif')
+                $img = imagecreatefromgif($this->cachedfile);
+            
+            if ((strtolower($ext) == 'png')) {
+                $img = imagecreatefrompng($this->cachedfile);
+            }
+            
+            
+            if (((strtolower($ext) == 'jpg') || (strtolower($ext) == 'jpeg'))) {
+                $img = imagecreatefromjpeg($this->cachedfile);
+            }
+			}
+		else
+		  {
+				$this->output = 0;
+				$this->create_cached();
+                $json["debug"][] = "NON Esiste: ". $this->cachedfile;
+		  }	
+
+        if (file_exists($filename)) 
+        {
+			$json["debug"][] = "Esiste: ". $filename;
+            
+            if (strtolower($ext) == 'gif')
+                $img_orig = imagecreatefromgif($filename);
+            
+            if ((strtolower($ext) == 'png')) {
+                $img_orig = imagecreatefrompng($filename);
+            }
+            
+            
+            if (((strtolower($ext) == 'jpg') || (strtolower($ext) == 'jpeg'))) {
+                $img_orig = imagecreatefromjpeg($filename);
+            }
+            
+
+        }
+		else
+		  {
+			$json["debug"][] = "NON Esiste filename: ". $filename;
+		  }	
+	  
+	  if ($img_orig)
+	   {
+	     $json["original_width"] = imagesx($img_orig);
+	     $json["original_height"] = imagesy($img_orig);
+	   }
+	  if ($img)   
+	   {
+	     $json["resized_width"] = imagesx($img);
+	     $json["resized_height"] = imagesx($img);
+	   }  
+	  @imagedestroy($img);
+	  @imagedestroy($img_orig);			
+	  $this->ImageInfo = $json;
+	  return $json;	
+	}
+
+	
+	
     public function asciize($filename = '', $chars = 'Battello', $shrpns = 1, $size = 4, $weight = 2, $output = 1, $w = 800, $h = 600, $c = 0)
     {
         
@@ -264,7 +366,7 @@ class ImageManipulate
         imagecolortransparent($new_image, $transparencyIndex);
     }
     
-    public function resize($filename, $w = 300, $h = 300, $c = 1, $s = 0)
+    public function resize($filename, $w = 300, $h = 300, $c = 1, $s = 0, $align='c')
     {
         $this->filename = $filename;
         $this->s        = $s;
@@ -276,10 +378,155 @@ class ImageManipulate
         
         if (!file_exists($this->CachePath))
             mkdir($this->CachePath);
-        $this->cachedfile = $this->CachePath . "s" . $this->s . "px_c" . $this->c . "_" . $this->w . "x" . $this->h . "px_" . sha1($filename) . "." . $ext;
-        $this->create_cached();
+        if ($this->cachedfile == '')
+          $this->cachedfile = $this->CachePath ."al_".$align. "_s" . $this->s . "px_c" . $this->c . "_" . $this->w . "x" . $this->h . "px_" . sha1($filename) . "." . $ext;
+        $this->create_cached(null,$align);
         //return ($cachedfile);
     }
+
+    public function resize_overwrite($filename, $w = 300, $h = 300, $c = 1, $s = 0, $align='c')
+    {
+        $this->filename = $filename;
+        $this->s        = $s;
+        $this->c        = $c;
+        $this->w        = $w;
+        $this->h        = $h;
+        //echo $filename."<br />";
+        $ext            = substr(strrchr($filename, '.'), 1);
+        
+        //if (!file_exists($this->CachePath))
+        //    mkdir($this->CachePath);
+        //$this->cachedfile = $this->CachePath ."al_".$align. "_s" . $this->s . "px_c" . $this->c . "_" . $this->w . "x" . $this->h . "px_" . sha1($filename) . "." . $ext;
+        $this->cachedfile = $filename;
+        $this->create_cached(null,$align);
+        //return ($cachedfile);
+    }
+
+    public function resize_newfile($filename,$prefix, $w = 300, $h = 300, $c = 1, $s = 0, $align='c')
+    {
+        $this->filename = $filename;
+        $this->s        = $s;
+        $this->c        = $c;
+        $this->w        = $w;
+        $this->h        = $h;
+        //echo $filename."<br />";
+        $ext            = substr(strrchr($filename, '.'), 1);
+        
+        //if (!file_exists($this->CachePath))
+        //    mkdir($this->CachePath);
+        //$this->cachedfile = $this->CachePath ."al_".$align. "_s" . $this->s . "px_c" . $this->c . "_" . $this->w . "x" . $this->h . "px_" . sha1($filename) . "." . $ext;
+        $fn = dirname($filename) . DIRECTORY_SEPARATOR . $prefix. basename($filename);
+
+        $this->cachedfile = $fn;
+        $this->create_cached(null,$align);
+
+			
+    }
+
+
+    public function resize_newfile_no_prefix($filename,$filename_dest, $w = 300, $h = 300, $c = 1, $s = 0, $align='c')
+    {
+        $this->filename = $filename;
+        $this->s        = $s;
+        $this->c        = $c;
+        $this->w        = $w;
+        $this->h        = $h;
+        //echo $filename."<br />";
+        $ext            = substr(strrchr($filename, '.'), 1);
+        
+        //if (!file_exists($this->CachePath))
+        //    mkdir($this->CachePath);
+        //$this->cachedfile = $this->CachePath ."al_".$align. "_s" . $this->s . "px_c" . $this->c . "_" . $this->w . "x" . $this->h . "px_" . sha1($filename) . "." . $ext;
+        $fn = $filename_dest;
+
+        $this->cachedfile = $fn;
+        $this->create_cached(null,$align);
+
+			
+    }
+
+    public function resize_newfile_mask($filename,$prefix,$mask, $w = 300, $h = 300, $c = 1, $s = 0, $align='c')
+    {
+        $this->filename = $filename;
+        $this->s        = $s;
+        $this->c        = $c;
+        $this->w        = $w;
+        $this->h        = $h;
+        $ext            = substr(strrchr($filename, '.'), 1);
+
+        $mask = imagecreatefrompng($mask);
+        //if (!file_exists($this->CachePath))
+        //    mkdir($this->CachePath);
+        //$this->cachedfile = $this->CachePath ."al_".$align. "_s" . $this->s . "px_c" . $this->c . "_" . $this->w . "x" . $this->h . "px_" . sha1($filename) . "." . $ext;
+        
+        $fn = dirname($filename) . DIRECTORY_SEPARATOR . $prefix. basename($filename);
+//        echo $fn."\n";
+        $this->cachedfile = $fn;
+        $this->create_cached(null,$align);
+
+
+			if (file_exists($this->cachedfile)) {
+                //echo "\nesiste". $this->cachedfile . "\n"; 
+                
+                if (strtolower($ext) == 'gif')
+                    $imc = imagecreatefromgif($this->cachedfile);
+                
+                if ((strtolower($ext) == 'png')) {
+                    $imc = imagecreatefrompng($this->cachedfile);
+                }
+                
+                
+                if (((strtolower($ext) == 'jpg') || (strtolower($ext) == 'jpeg'))) {
+                    $imc = imagecreatefromjpeg($this->cachedfile);
+                }
+                
+            }
+
+	//$fn = dirname($filename_dest) . "\\imc_". basename($filename_dest);
+    //imagepng($imc,$fn,90);       
+
+
+
+	
+	//print_r( $mask);
+	$xSize = imagesx( $imc );
+    $ySize = imagesy( $imc );
+    $newPicture = imagecreatetruecolor( $xSize, $ySize );
+    imagesavealpha( $newPicture, true );
+    imagefill( $newPicture, 0, 0, imagecolorallocatealpha( $newPicture, 0, 0, 0, 127 ) );
+
+    // Resize mask if necessary
+   // echo $xSize . "->".imagesx( $mask );
+    if( $xSize != imagesx( $mask ) || $ySize != imagesy( $mask ) ) {
+		
+        $tempPic = imagecreatetruecolor( $xSize, $ySize );
+        imagecopyresampled( $tempPic, $mask, 0, 0, 0, 0, $xSize, $ySize, imagesx( $mask ), imagesy( $mask ) );
+        imagedestroy( $mask );
+        $mask = $tempPic;
+    }
+
+	//$fn = dirname($filename_dest) . "\\0_". basename($filename_dest);
+    //imagepng($mask,$fn);       
+
+    // Perform pixel-based alpha map application
+    for( $x = 0; $x < $xSize; $x++ ) {
+        for( $y = 0; $y < $ySize; $y++ ) {
+            $alpha = imagecolorsforindex( $mask, imagecolorat( $mask, $x, $y ) );
+            $alpha = 127 - floor( $alpha[ 'red' ] / 2 );
+            $color = imagecolorsforindex( $imc, imagecolorat( $imc, $x, $y ) );
+            imagesetpixel( $newPicture, $x, $y, imagecolorallocatealpha( $newPicture, $color[ 'red' ], $color[ 'green' ], $color[ 'blue' ],$alpha ) );
+        }
+    }
+
+
+    //imagepng($mask,"1_".$filename_dest);       
+		$ext=substr(strrchr($filename, '.'), 1);
+		$fn = dirname($filename) . DIRECTORY_SEPARATOR . $prefix. str_replace(".".$ext,".png",basename($filename));
+		
+		imagepng($newPicture,$fn);
+        
+    }
+
     
     public function ApplyFilter($filename, $filtertype, $w = 300, $h = 300, $c = 1, $s = 0, $arg1 = 128, $arg2 = 128, $arg3 = 128, $arg4 = 128)
     {
@@ -528,17 +775,20 @@ class ImageManipulate
         @imagedestroy($im);
     }
     
-    private function create_cached($imc = null)
+    private function create_cached($imc = null,$align='c')
     {
+	  if (file_exists($this->filename))
+	   {	
         $ext = substr(strrchr($this->filename, '.'), 1);
+       }
         
         if (is_null($imc)) {
             $ext = substr(strrchr($this->filename, '.'), 1);
-            //echo $this->filename;
-            //echo "esiste ? ". $cachedfile . "<br>"; 
+          //  echo "\next: " . $ext . " filename: " . $this->filename . "\n";
+          //  echo "<br />esiste ? ". $this->cachedfile . "\n<br />"; 
             
-            if (file_exists($this->cachedfile)) {
-                //echo "esiste". $cachedfile . "<br>"; 
+            if (file_exists($this->cachedfile) && ($this->cachedfile != $this->filename)) {
+                echo "<br />esiste". $this->cachedfile . "\n"; 
                 
                 if (strtolower($ext) == 'gif')
                     $imc = imagecreatefromgif($this->cachedfile);
@@ -553,56 +803,83 @@ class ImageManipulate
                 }
                 
             } else {
-                
+               //  echo "<br />non esiste la cache". $this->CachePath.$this->cachedfile . "\n"; 
+               //  echo "<br />esiste". $this->filename . "?\n"; 
+			if (file_exists($this->filename))
+			  {
+				// echo "<br />ESISTE!!!";
+				// echo "\ned ha estensione: " . $ext . "\n";
                 if (strtolower($ext) == 'gif')
+                {
                     $im = imagecreatefromgif($this->filename);
-                
+				//	echo "\nè gif";
+                }
                 if ((strtolower($ext) == 'png')) {
-                    $im = imagecreatefrompng($this->filename);
+						$im = imagecreatefrompng($this->filename);
+				//	echo "\nè png";
+
                 }
                 
                 
                 if (((strtolower($ext) == 'jpg') || (strtolower($ext) == 'jpeg'))) {
-                    $this->orient_image($this->filename);
+   					//echo "\n".$this->filename." è jpg";
+//                    $this->orient_image($this->filename);
                     $im = imagecreatefromjpeg($this->filename);
+   					//echo "\n".$this->filename." è jpg ma...";
+					//echo $im;
                 }
+              
                 
                 // in $im c'Ã¨ l'immagine originale
                 
                 if (!$im) {
-                    exit;
+                   // echo "im è null";
+					$im = imagecreatefrompng($this->filename);
+					if (!$im) {
+						$im = imagecreatefromjpeg($this->filename);
+                    }
+					if (!$im) {
+						$im = imagecreatefromgif($this->filename);
+                    }
+					
                 }
-                
-                
+                if (!$im) {
+					exit;
+				}                
+                //echo "\nin im c'è qualcosa.";
                 if (($this->w != 0) && ($this->h != 0)) {
                     
                     if ($this->c == 0)
-                        $imc = $this->redim_wh($im, $this->w, $this->h);
+                        $imc = $this->redim_wh($im, $this->w, $this->h,$align);
                     else
-                        $imc = $this->redim_whc($im, $this->w, $this->h);
+                        $imc = $this->redim_whc($im, $this->w, $this->h,$align);
                 } else {
                     
                     if ($this->s > 0) {
                         
                         if ($this->c == 0)
-                            $imc = $this->redim_s($im, $this->s);
+                            $imc = $this->redim_s($im, $this->s,$align);
                         else
-                            $imc = $this->redim_sc($im, $this->s);
+                            $imc = $this->redim_sc($im, $this->s,$align);
                     } else {
                         $imc = $im;
                     }
                     
                 }
-                
+			}
             }
             
         }
         
+        //echo "\next: " . $ext . " cached: " . $this->cachedfile . "\n";
         
         if ((strtolower($ext) == 'jpg') || (strtolower($ext) == 'jpeg')) {
             //$backgroundColor = imagecolorallocate($imc, 255, 255, 255);
             //imagefill($imc, 0, 0, $backgroundColor);
+			//echo "\n".$this->cachedfile." è jpg";
+
             imagejpeg($imc, $this->cachedfile, 85);
+            //echo "creo: " .$this->cachedfile."\n";
         }
         
         
@@ -644,6 +921,7 @@ class ImageManipulate
         // wm($cachedfile);
         @imagedestroy($imc);
         @imagedestroy($im);
+	  
     }
     
     private function h_append($im1, $im2, $w, $h)
@@ -768,50 +1046,65 @@ class ImageManipulate
         @imagedestroy($im2);
     }
     
-    private function redim_wh($im, $w, $h)
-    {
-        $width  = imagesx($im);
-        $height = imagesy($im);
-        
-        if ($width > $height) {
-            
-            if (($width < $w) && ($height < $h)) {
-                $new_width  = $width;
-                $new_height = $height;
-            } else {
-                $ratio      = min($w / $width, $h / $height);
-                $new_width  = round($width * $ratio);
-                $new_height = round($height * $ratio);
-            }
-            
-        } else {
-            
-            if (($width < $w) && ($height < $h)) {
-                $new_width  = $width;
-                $new_height = $height;
-            } else {
-                $ratio      = min($w / $width, $h / $height);
-                $new_width  = round($width * $ratio);
-                $new_height = round($height * $ratio);
-            }
-            
-        }
-        
-        $image_p = imagecreatetruecolor($new_width, $new_height);
-        imagesavealpha($image_p, true);
-        $trans_colour = imagecolorallocatealpha($image_p, 0, 0, 0, 127);
-        imagefill($image_p, 0, 0, $trans_colour);
-        imagecopyresampled($image_p, $im, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
-        $this->img = $image_pc;
-        return $image_p;
-        @imagedestroy($image_p);
-        @imagedestroy($im);
-    }
     
-    private function redim_whc($im, $w, $h)
+		private function redim_wh($im,$w,$h)
+		{
+		$width = imagesx($im);
+		$height = imagesy($im);
+
+		if ($width > $height)
+		 {
+			 if (($width < $w) && ($height < $h))
+			  {
+				  $new_width = $width;
+				  $new_height = $height;
+			  }
+			 else
+			  {
+				  $ratio = min($w/$width,$h/$height);
+				  $new_width = round($width * $ratio);
+				  $new_height = round($height * $ratio);
+			  } 
+		 }
+		else
+		 {
+			 if (($width < $w) && ($height < $h))
+			  {
+				  $new_width = $width;
+				  $new_height = $height;
+			  }
+			 else
+			  {
+				  $ratio = min($w/$width,$h/$height);
+				  $new_width = round($width * $ratio);
+				  $new_height = round($height * $ratio);
+			  } 
+
+		 } 
+		 
+		  $image_p = imagecreatetruecolor($new_width, $new_height);
+		  imagesavealpha($image_p, true);
+		  $trans_colour = imagecolorallocatealpha($image_p, 0, 0, 0, 127);
+          imagefill($image_p, 0, 0, $trans_colour);
+
+		  
+		  imagecopyresampled($image_p, $im, 0, 0, 0, 0, $new_width, $new_height, $width , $height);
+ 		 $this->img = $image_p;
+
+		return $image_p;
+		@imagedestroy($image_p);
+		@imagedestroy($im);
+
+		}
+    
+
+
+    private function redim_whc($im, $w, $h,$align='c')
     {
-        $width  = imagesx($im);
+	//	echo "qui";
+		$width  = imagesx($im);
         $height = imagesy($im);
+	//	echo "dim:" . $width . "X" . $height . "<br />";
         
         if ($width > $height) {
             
@@ -842,12 +1135,65 @@ class ImageManipulate
             }
             
         }
+
+		//echo "dim:" . $width . "X" . $height . "<br />";
         
         $im       = $this->redim_wh($im, $new_width, $new_height);
         $width    = imagesx($im);
         $height   = imagesy($im);
-        $top_c    = round(($height - $h) / 2);
-        $left_c   = round(($width - $w) / 2);
+
+		//echo "dim:" . $width . "X" . $height . "<br />";
+
+
+		 $top_c = round(($height - $h)/2);
+		 $left_c = round(($width - $w)/2);
+		 
+		 		//echo "t:" . $top_c . "X" . $left_c . "<br />";
+
+		if ($align == 't') //top
+		  {
+			$top_c    = 0;//round(($height - $s) / 2);
+			$left_c   = round(($width - $w) / 2);
+		  }
+		if (($align == 'tr')||($align == 'rt'))//top-right
+		  {
+			$top_c    = 0;//round(($height - $s) / 2);
+			$left_c   = round($width - $w);
+		  }
+		if ($align == 'r')//right
+		  {
+			$top_c    = round(($height - $h) / 2);
+			$left_c   = round($width - $w);
+		  }
+		if (($align == 'rb')||($align == 'br'))//right-bottom
+		  {
+			$top_c    = round($height - $h);
+			$left_c   = round($width - $w);
+		  }
+		if ($align == 'b')//bottom
+		  {
+			$top_c    = round($height - $h);
+			$left_c   =  round(($width - $w) / 2);
+		  }
+		if (($align == 'bl')||($align == 'lb'))//bottom-left
+		  {
+			$top_c    = round($height - $h);
+			$left_c   =  0;
+		  }
+		if ($align == 'l')//left
+		  {
+			$top_c    = round(($height - $h) / 2);
+			$left_c   =  0;
+		  }
+
+		if (($align == 'lt')||($align == 'tl'))//left-top
+		  {
+			$top_c    = 0;
+			$left_c   =  0;
+		  }
+		//echo "t:" . $top_c . "X" . $left_c . "<br />";
+
+
         $image_pc = imagecreatetruecolor($w, $h);
         imagesavealpha($image_pc, true);
         $trans_colour = imagecolorallocatealpha($image_pc, 0, 0, 0, 127);
@@ -884,7 +1230,7 @@ class ImageManipulate
         @imagedestroy($im);
     }
     
-    private function redim_sc($im, $s)
+    private function redim_sc($im, $s,$align='c')
     {
         $width  = imagesx($im);
         $height = imagesy($im);
@@ -900,8 +1246,54 @@ class ImageManipulate
         $im       = $this->redim_wh($im, $new_width, $new_height);
         $width    = imagesx($im);
         $height   = imagesy($im);
-        $top_c    = round(($height - $s) / 2);
-        $left_c   = round(($width - $s) / 2);
+
+		$top_c    = round(($height - $s) / 2);
+		$left_c   = round(($width - $s) / 2);
+
+		if ($align == 't') //top
+		  {
+			$top_c    = 0;//round(($height - $s) / 2);
+			$left_c   = round(($width - $s) / 2);
+		  }
+		if (($align == 'tr')||($align == 'rt'))//top-right
+		  {
+			$top_c    = 0;//round(($height - $s) / 2);
+			$left_c   = round($width - $s);
+		  }
+		if ($align == 'r')//right
+		  {
+			$top_c    = round(($height - $s) / 2);
+			$left_c   = round($width - $s);
+		  }
+		if (($align == 'rb')||($align == 'br'))//right-bottom
+		  {
+			$top_c    = round($height - $s);
+			$left_c   = round($width - $s);
+		  }
+		if ($align == 'b')//bottom
+		  {
+			$top_c    = round($height - $s);
+			$left_c   =  round(($width - $s) / 2);
+		  }
+		if (($align == 'bl')||($align == 'lb'))//bottom-left
+		  {
+			$top_c    = round($height - $s);
+			$left_c   =  0;
+		  }
+		if ($align == 'l')//left
+		  {
+			$top_c    = round(($height - $s) / 2);
+			$left_c   =  0;
+		  }
+
+		if (($align == 'lt')||($align == 'tl'))//left-top
+		  {
+			$top_c    = 0;
+			$left_c   =  0;
+		  }
+
+
+
         $image_pc = imagecreatetruecolor($s, $s);
         imagesavealpha($image_pc, true);
         $trans_colour = imagecolorallocatealpha($image_pc, 0, 0, 0, 127);
